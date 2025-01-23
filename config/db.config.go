@@ -1,6 +1,6 @@
 package config
 
-import "cinema_api/utils"
+import "cinema_api/helper"
 
 type DbConfig struct {
 	DbHost     string
@@ -14,10 +14,10 @@ var GlobalDbConfig DbConfig
 
 func SetupDbConfig() {
 	GlobalDbConfig = DbConfig{
-		DbHost:     utils.GetEnv("DB_HOST", "127.0.0.1"),
-		DbPort:     utils.GetEnv("DB_PORT", "3306"),
-		DbUser:     utils.GetEnv("DB_USER", "root"),
-		DbPassword: utils.GetEnv("DB_PASSWORD", ""),
-		DbName:     utils.GetEnv("DB_NAME", "inventory-management"),
+		DbHost:     helper.GetEnv("DB_HOST", "127.0.0.1"),
+		DbPort:     helper.GetEnv("DB_PORT", "3306"),
+		DbUser:     helper.GetEnv("DB_USER", "root"),
+		DbPassword: helper.GetEnv("DB_PASSWORD", ""),
+		DbName:     helper.GetEnv("DB_NAME", "inventory-management"),
 	}
 }

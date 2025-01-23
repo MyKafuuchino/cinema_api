@@ -1,6 +1,6 @@
 CREATE TABLE `screenings`
 (
-    `id`             integer PRIMARY KEY,
+    `id`             integer PRIMARY KEY AUTO_INCREMENT,
     `movie_id`       integer,
     `cinema_id`      integer,
     `screening_time` timestamp,

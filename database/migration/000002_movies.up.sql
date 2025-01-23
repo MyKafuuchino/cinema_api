@@ -1,6 +1,6 @@
 CREATE TABLE `movies`
 (
-    `id`           integer PRIMARY KEY,
+    `id`           integer PRIMARY KEY AUTO_INCREMENT,
     `title`        varchar(100),
     `description`  text,
     `genre`        varchar(50),

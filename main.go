@@ -3,6 +3,7 @@ package main
 import (
 	"cinema_api/config"
 	"cinema_api/database"
+	"cinema_api/middleware"
 	"cinema_api/route"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -13,7 +14,7 @@ func main() {
 	database.InitDb()
 
 	appPort := config.GlobalAppConfig.AppPort
-	app := fiber.New()
+	app := fiber.New(fiber.Config{ErrorHandler: middleware.ErrorHandler()})
 
 	route.InitRouter(app)
 

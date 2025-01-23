@@ -9,6 +9,9 @@ build:
 run:
 	@./dist/myapp
 
+dev:
+	go run main.go
+
 migration:
 	@$(MIGRATE) create -ext sql -dir $(MIGRATION_PATH) -seq $(name)
 
