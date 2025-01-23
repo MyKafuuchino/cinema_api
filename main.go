@@ -14,7 +14,10 @@ func main() {
 	database.InitDb()
 
 	appPort := config.GlobalAppConfig.AppPort
-	app := fiber.New(fiber.Config{ErrorHandler: middleware.ErrorHandler()})
+	app := fiber.New(fiber.Config{
+		ErrorHandler: middleware.ErrorHandler(),
+		JSONDecoder:  middleware.JSONDecoder(),
+	})
 
 	route.InitRouter(app)
 

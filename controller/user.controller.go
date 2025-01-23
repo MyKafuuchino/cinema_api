@@ -81,3 +81,18 @@ func (c *UserController) UpdateUser(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(types.NewResponseSuccess("Update user successfully", userResponse))
 }
+
+func (c *UserController) DeleteUserById(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	uId, err := helper.StringToUint(id)
+	if err != nil {
+		return err
+	}
+
+	userResponse, err := c.userService.DeleteUserById(uId)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(types.NewResponseSuccess("Delete user successfully", userResponse))
+}

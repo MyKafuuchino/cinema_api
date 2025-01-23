@@ -42,8 +42,7 @@ func (r userRepository) Update(user *model.User) error {
 }
 
 func (r userRepository) Delete(id uint) error {
-	//TODO implement me
-	panic("implement me")
+	return r.db.Where("id = ?", id).Delete(&model.User{}).Error
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {

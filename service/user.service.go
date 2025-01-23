@@ -16,6 +16,7 @@ type UserService interface {
 	GetUserById(id uint) (*types.UserResponse, error)
 	CreateUser(createUserReq *dto.CreateUserRequest) (*types.UserResponse, error)
 	UpdateUserById(id uint, updateRequest *dto.UpdateUserRequest) (*types.UserResponse, error)
+	DeleteUserById(id uint) (*types.UserResponse, error)
 }
 
 type userService struct {
@@ -98,7 +99,7 @@ func (s userService) UpdateUserById(id uint, updateRequest *dto.UpdateUserReques
 		return nil, err
 	}
 
-	helper.MapUpdateField(user, updateRequest)
+	helper.UpdateFields(user, updateRequest)
 
 	if err := s.userRepo.Update(user); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to update user : "+err.Error())
@@ -113,6 +114,30 @@ func (s userService) UpdateUserById(id uint, updateRequest *dto.UpdateUserReques
 		UpdateAt: user.UpdatedAt,
 	}
 
+	return &userResponse, nil
+}
+
+func (s userService) DeleteUserById(id uint) (*types.UserResponse, error) {
+	user, err := s.userRepo.FindById(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "User not found")
+		}
+		return nil, err
+	}
+
+	if err := s.userRepo.Delete(user.ID); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to delete user : "+err.Error())
+	}
+
+	userResponse := types.UserResponse{
+		ID:       user.ID,
+		FullName: user.FullName,
+		Email:    user.Email,
+		Role:     user.Role,
+		CreateAt: user.CreatedAt,
+		UpdateAt: user.UpdatedAt,
+	}
 	return &userResponse, nil
 }
 

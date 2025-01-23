@@ -18,4 +18,5 @@ func SetupUserRouter(c fiber.Router) {
 	userRouter.Get("/:id", userController.GetUserById)
 	userRouter.Post("", userController.CreateUser)
 	userRouter.Put("/:id", userController.UpdateUser)
+	userRouter.Delete("/:id", userController.DeleteUserById)
 }
