@@ -14,7 +14,7 @@ func SetupCinemaRoute(c fiber.Router) {
 	cinemaService := service.NewCinemaService(cinemaRepo)
 	cinemaController := controller.NewCinemaController(cinemaService)
 
-	cinemaRoute := c.Group("/movies")
+	cinemaRoute := c.Group("/cinema")
 	cinemaRoute.Get("", cinemaController.GetAllCinema)
 	cinemaRoute.Get("/:id", cinemaController.GetCinemaById)
 	cinemaRoute.Post("", middleware.ProtectRouteByRole("ADMIN"), cinemaController.CreateCinema)

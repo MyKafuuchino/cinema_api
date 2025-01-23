@@ -27,3 +27,7 @@ migrate-status:
 migrate-reset:
 	@$(MIGRATE) -path $(MIGRATION_PATH) -database "$(DB_URL)" down
 	@$(MIGRATE) -path $(MIGRATION_PATH) -database "$(DB_URL)" up
+
+migrate-force:
+	@$(MIGRATE) -path $(MIGRATION_PATH) -database "$(DB_URL)" force ${version}
+

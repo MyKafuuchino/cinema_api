@@ -10,6 +10,6 @@ CREATE TABLE `screenings`
 );
 
 ALTER TABLE `screenings`
-    ADD FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`);
+    ADD FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE `screenings`
-    ADD FOREIGN KEY (`cinema_id`) REFERENCES `cinemas` (`id`);
+    ADD FOREIGN KEY (`cinema_id`) REFERENCES `cinemas` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
