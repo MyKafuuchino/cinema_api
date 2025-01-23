@@ -3,6 +3,7 @@ package main
 import (
 	"cinema_api/config"
 	"cinema_api/database"
+	"cinema_api/database/seeder"
 	"cinema_api/middleware"
 	"cinema_api/route"
 	"github.com/gofiber/fiber/v2"
@@ -12,6 +13,8 @@ import (
 func main() {
 	config.InitEnvConfig()
 	database.InitDb()
+
+	seeder.UserSeed()
 
 	appPort := config.GlobalAppConfig.AppPort
 	app := fiber.New(fiber.Config{

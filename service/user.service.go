@@ -50,6 +50,7 @@ func (s userService) GetUserById(id uint) (*types.UserResponse, error) {
 		}
 		return nil, err
 	}
+
 	userResponse := types.UserResponse{
 		ID:       user.ID,
 		FullName: user.FullName,
@@ -63,10 +64,15 @@ func (s userService) GetUserById(id uint) (*types.UserResponse, error) {
 }
 
 func (s userService) CreateUser(createUserReq *dto.CreateUserRequest) (*types.UserResponse, error) {
+	hashedPassword, err := helper.HashPassword(createUserReq.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	user := &model.User{
 		FullName: createUserReq.FullName,
 		Email:    createUserReq.Email,
-		Password: createUserReq.Password,
+		Password: hashedPassword,
 		Role:     createUserReq.Role,
 	}
 
@@ -100,6 +106,14 @@ func (s userService) UpdateUserById(id uint, updateRequest *dto.UpdateUserReques
 	}
 
 	helper.UpdateFields(user, updateRequest)
+
+	if updateRequest.Password != nil {
+		hashedPassword, err := helper.HashPassword(*updateRequest.Password)
+		if err != nil {
+			return nil, err
+		}
+		user.Password = hashedPassword
+	}
 
 	if err := s.userRepo.Update(user); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to update user : "+err.Error())

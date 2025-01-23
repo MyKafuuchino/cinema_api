@@ -24,6 +24,6 @@ func ErrorHandler() fiber.ErrorHandler {
 			return ctx.Status(code).JSON(types.NewResponseError(fiberErr.Message))
 		}
 
-		return ctx.Status(code).JSON(types.NewResponseError("Internal Server Error : ", err.Error()))
+		return ctx.Status(code).JSON(types.NewResponseError("Internal Server Error", err.Error()))
 	}
 }

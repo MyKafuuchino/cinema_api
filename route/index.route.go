@@ -6,5 +6,7 @@ import (
 
 func InitRouter(router fiber.Router) {
 	api := router.Group("/api")
+	SetupAuthRoute(api)
 	SetupUserRouter(api)
+	SetupMovieRoute(api)
 }
