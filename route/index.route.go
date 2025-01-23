@@ -9,4 +9,5 @@ func InitRouter(router fiber.Router) {
 	SetupAuthRoute(api)
 	SetupUserRouter(api)
 	SetupMovieRoute(api)
+	SetupCinemaRoute(api)
 }
