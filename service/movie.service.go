@@ -17,10 +17,13 @@ type MovieService interface {
 	CreateMovie(createRequest *dto.CreateMovieRequest) (*types.MovieResponse, error)
 	UpdateMovieById(id uint, updateRequest *dto.UpdateMovieRequest) (*types.MovieResponse, error)
 	DeleteMovieById(id uint) (*types.MovieResponse, error)
+
+	GetScreeningsByMovie(id uint) ([]types.ScreeningResponse, error)
 }
 
 type movieService struct {
-	movieRepo repository.MovieRepository
+	movieRepo     repository.MovieRepository
+	screeningRepo repository.ScreeningRepository
 }
 
 func (s movieService) GetAllMovies() ([]types.MovieResponse, error) {
@@ -152,6 +155,29 @@ func (s movieService) DeleteMovieById(id uint) (*types.MovieResponse, error) {
 	return &movieResponse, nil
 }
 
-func NewMovieService(movieRepo repository.MovieRepository) MovieService {
-	return &movieService{movieRepo: movieRepo}
+func (s movieService) GetScreeningsByMovie(id uint) ([]types.ScreeningResponse, error) {
+	screenings, err := s.screeningRepo.FindByCinema(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Screening not found")
+		}
+		return nil, err
+	}
+	screeningsResponse := make([]types.ScreeningResponse, len(screenings))
+	for i, screening := range screenings {
+		screeningsResponse[i] = types.ScreeningResponse{
+			ID:            screening.ID,
+			MovieID:       screening.MovieID,
+			CinemaID:      screening.CinemaID,
+			ScreeningTime: screening.ScreeningTime,
+			Price:         screening.Price,
+			CreatedAt:     screening.CreatedAt,
+			UpdatedAt:     screening.UpdatedAt,
+		}
+	}
+	return screeningsResponse, nil
+}
+
+func NewMovieService(movieRepo repository.MovieRepository, screeningRepo repository.ScreeningRepository) MovieService {
+	return &movieService{movieRepo: movieRepo, screeningRepo: screeningRepo}
 }

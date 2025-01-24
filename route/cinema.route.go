@@ -10,8 +10,11 @@ import (
 )
 
 func SetupCinemaRoute(c fiber.Router) {
-	cinemaRepo := repository.NewCinemaRepository(database.Db)
-	cinemaService := service.NewCinemaService(cinemaRepo)
+	db := database.Db
+	cinemaRepo := repository.NewCinemaRepository(db)
+	screeningRepo := repository.NewScreeningRepository(db)
+
+	cinemaService := service.NewCinemaService(cinemaRepo, screeningRepo)
 	cinemaController := controller.NewCinemaController(cinemaService)
 
 	cinemaRoute := c.Group("/cinema")
@@ -20,4 +23,6 @@ func SetupCinemaRoute(c fiber.Router) {
 	cinemaRoute.Post("", middleware.ProtectRouteByRole("ADMIN"), cinemaController.CreateCinema)
 	cinemaRoute.Put("/:id", middleware.ProtectRouteByRole("ADMIN"), cinemaController.UpdateCinema)
 	cinemaRoute.Delete("/:id", middleware.ProtectRouteByRole("ADMIN"), cinemaController.DeleteCinemaById)
+
+	cinemaRoute.Get("/:id/screenings", cinemaController.GetScreeningsByMovie)
 }

@@ -96,3 +96,17 @@ func (c *CinemaController) DeleteCinemaById(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(types.NewResponseSuccess("Delete cinema successfully", cinemaResponse))
 }
+
+func (c *CinemaController) GetScreeningsByMovie(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	uId, err := helper.StringToUint(id)
+	if err != nil {
+		return err
+	}
+
+	screeningResponse, err := c.cinemaService.GetScreeningsByCinema(uId)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(types.NewResponseSuccess("Get screenings by cinema successfully", screeningResponse))
+}
