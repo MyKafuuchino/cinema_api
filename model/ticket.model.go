@@ -3,11 +3,11 @@ package model
 import "time"
 
 type Ticket struct {
-	ID          int       `gorm:"primaryKey"`
-	UserID      int       `gorm:"index"`
-	ScreeningID int       `gorm:"index"`
+	ID          uint      `gorm:"primaryKey"`
+	UserID      uint      `gorm:"index"`
+	ScreeningID uint      `gorm:"index"`
 	SeatNumber  string    `gorm:"size:10"`
-	Status      string    `gorm:"type:enum('booked','paid')"`
+	Status      string    `gorm:"type:enum('booked','paid');default:'booked'"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 }

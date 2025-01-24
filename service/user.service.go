@@ -17,13 +17,16 @@ type UserService interface {
 	CreateUser(createUserReq *dto.CreateUserRequest) (*types.UserResponse, error)
 	UpdateUserById(id uint, updateRequest *dto.UpdateUserRequest) (*types.UserResponse, error)
 	DeleteUserById(id uint) (*types.UserResponse, error)
+
+	GetTicketByUserId(id uint) ([]types.TicketResponse, error)
 }
 
 type userService struct {
-	userRepo repository.UserRepository
+	userRepo   repository.UserRepository
+	ticketRepo repository.TicketRepository
 }
 
-func (s userService) GetAllUsers() ([]types.UserResponse, error) {
+func (s *userService) GetAllUsers() ([]types.UserResponse, error) {
 	users, err := s.userRepo.FindAll()
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
@@ -42,7 +45,7 @@ func (s userService) GetAllUsers() ([]types.UserResponse, error) {
 	return allUsersResponse, nil
 }
 
-func (s userService) GetUserById(id uint) (*types.UserResponse, error) {
+func (s *userService) GetUserById(id uint) (*types.UserResponse, error) {
 	user, err := s.userRepo.FindById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -63,7 +66,7 @@ func (s userService) GetUserById(id uint) (*types.UserResponse, error) {
 	return &userResponse, nil
 }
 
-func (s userService) CreateUser(createUserReq *dto.CreateUserRequest) (*types.UserResponse, error) {
+func (s *userService) CreateUser(createUserReq *dto.CreateUserRequest) (*types.UserResponse, error) {
 	hashedPassword, err := helper.HashPassword(createUserReq.Password)
 	if err != nil {
 		return nil, err
@@ -95,7 +98,7 @@ func (s userService) CreateUser(createUserReq *dto.CreateUserRequest) (*types.Us
 	return &userResponse, nil
 }
 
-func (s userService) UpdateUserById(id uint, updateRequest *dto.UpdateUserRequest) (*types.UserResponse, error) {
+func (s *userService) UpdateUserById(id uint, updateRequest *dto.UpdateUserRequest) (*types.UserResponse, error) {
 	user, err := s.userRepo.FindById(id)
 
 	if err != nil {
@@ -131,7 +134,7 @@ func (s userService) UpdateUserById(id uint, updateRequest *dto.UpdateUserReques
 	return &userResponse, nil
 }
 
-func (s userService) DeleteUserById(id uint) (*types.UserResponse, error) {
+func (s *userService) DeleteUserById(id uint) (*types.UserResponse, error) {
 	user, err := s.userRepo.FindById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -155,6 +158,33 @@ func (s userService) DeleteUserById(id uint) (*types.UserResponse, error) {
 	return &userResponse, nil
 }
 
-func NewUserService(userRepo repository.UserRepository) UserService {
-	return &userService{userRepo: userRepo}
+func (s *userService) GetTicketByUserId(id uint) ([]types.TicketResponse, error) {
+	if _, err := s.userRepo.FindById(id); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "User not found :"+err.Error())
+		}
+		return nil, err
+	}
+
+	tickets, err := s.ticketRepo.FindByUserId(id)
+	if err != nil {
+		return nil, err
+	}
+	ticketsResponse := make([]types.TicketResponse, len(tickets))
+	for i, ticket := range tickets {
+		ticketsResponse[i] = types.TicketResponse{
+			ID:          ticket.ID,
+			UserID:      ticket.UserID,
+			ScreeningID: ticket.ScreeningID,
+			SeatNumber:  ticket.SeatNumber,
+			Status:      ticket.Status,
+			CreatedAt:   ticket.CreatedAt,
+			UpdatedAt:   ticket.UpdatedAt,
+		}
+	}
+	return ticketsResponse, nil
+}
+
+func NewUserService(userRepo repository.UserRepository, ticketRepository repository.TicketRepository) UserService {
+	return &userService{userRepo: userRepo, ticketRepo: ticketRepository}
 }

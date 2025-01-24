@@ -90,3 +90,18 @@ func (c *ScreeningController) DeleteScreeningById(ctx *fiber.Ctx) error {
 	}
 	return ctx.Status(fiber.StatusOK).JSON(types.NewResponseSuccess("Delete screening successfully", deletedScreeningResponse))
 }
+
+func (c *ScreeningController) GetTicketsByScreeningId(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	uId, err := helper.StringToUint(id)
+	if err != nil {
+		return err
+	}
+
+	ticketsResponse, err := c.screeningService.GetTicketsByScreeningId(uId)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(types.NewResponseSuccess("Get tickets successfully", ticketsResponse))
+}

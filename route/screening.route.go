@@ -14,8 +14,9 @@ func SetupScreeningRouter(r fiber.Router) {
 	screeningRepo := repository.NewScreeningRepository(db)
 	movieRepo := repository.NewMovieRepository(db)
 	cinemaRepo := repository.NewCinemaRepository(db)
+	ticketRepo := repository.NewTicketRepository(db)
 
-	screeningService := service.NewScreeningService(screeningRepo, movieRepo, cinemaRepo)
+	screeningService := service.NewScreeningService(screeningRepo, movieRepo, cinemaRepo, ticketRepo)
 	screeningController := controller.NewScreeningController(screeningService)
 
 	screeningRouter := r.Group("/screenings")
@@ -24,4 +25,6 @@ func SetupScreeningRouter(r fiber.Router) {
 	screeningRouter.Post("", middleware.ProtectRouteByRole("ADMIN"), screeningController.CreateScreening)
 	screeningRouter.Put("/:id", middleware.ProtectRouteByRole("ADMIN"), screeningController.UpdateScreening)
 	screeningRouter.Delete("/:id", middleware.ProtectRouteByRole("ADMIN"), screeningController.DeleteScreeningById)
+
+	screeningRouter.Get("/:id/tickets", screeningController.GetTicketsByScreeningId)
 }

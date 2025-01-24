@@ -96,3 +96,18 @@ func (c *UserController) DeleteUserById(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(types.NewResponseSuccess("Delete user successfully", userResponse))
 }
+
+func (c *UserController) GetTicketByUserId(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	uId, err := helper.StringToUint(id)
+	if err != nil {
+		return err
+	}
+
+	ticketResponse, err := c.userService.GetTicketByUserId(uId)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(types.NewResponseSuccess("Get ticket by user successfully", ticketResponse))
+}

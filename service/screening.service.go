@@ -17,12 +17,15 @@ type ScreeningService interface {
 	CreateNewScreening(screeningReq *dto.CreateScreeningRequest) (*types.ScreeningResponse, error)
 	UpdateScreeningById(id uint, screeningReq *dto.UpdateScreeningRequest) (*types.ScreeningResponse, error)
 	DeleteScreeningById(id uint) (*types.ScreeningResponse, error)
+
+	GetTicketsByScreeningId(id uint) ([]types.TicketResponse, error)
 }
 
 type screeningService struct {
 	screeningRepo repository.ScreeningRepository
 	movieRepo     repository.MovieRepository
 	cinemaRepo    repository.CinemaRepository
+	ticketRepo    repository.TicketRepository
 }
 
 func (s *screeningService) GetAllScreenings() ([]types.ScreeningResponse, error) {
@@ -176,6 +179,34 @@ func (s *screeningService) DeleteScreeningById(id uint) (*types.ScreeningRespons
 	return &screeningResponse, nil
 }
 
-func NewScreeningService(screeningRepo repository.ScreeningRepository, movieRepo repository.MovieRepository, cinemaRepo repository.CinemaRepository) ScreeningService {
-	return &screeningService{screeningRepo: screeningRepo, movieRepo: movieRepo, cinemaRepo: cinemaRepo}
+func (s *screeningService) GetTicketsByScreeningId(id uint) ([]types.TicketResponse, error) {
+	if _, err := s.screeningRepo.FindById(id); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "screening not found : "+err.Error())
+		}
+		return nil, err
+	}
+
+	tickets, err := s.ticketRepo.FindByScreeningId(id)
+	if err != nil {
+		return nil, err
+	}
+
+	ticketsResponse := make([]types.TicketResponse, len(tickets))
+	for i, ticket := range tickets {
+		ticketsResponse[i] = types.TicketResponse{
+			ID:          ticket.ID,
+			UserID:      ticket.UserID,
+			ScreeningID: ticket.ScreeningID,
+			SeatNumber:  ticket.SeatNumber,
+			Status:      ticket.Status,
+			CreatedAt:   ticket.CreatedAt,
+			UpdatedAt:   ticket.UpdatedAt,
+		}
+	}
+	return ticketsResponse, nil
+}
+
+func NewScreeningService(screeningRepo repository.ScreeningRepository, movieRepo repository.MovieRepository, cinemaRepo repository.CinemaRepository, ticketRepository repository.TicketRepository) ScreeningService {
+	return &screeningService{screeningRepo: screeningRepo, movieRepo: movieRepo, cinemaRepo: cinemaRepo, ticketRepo: ticketRepository}
 }

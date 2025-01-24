@@ -10,8 +10,11 @@ import (
 )
 
 func SetupUserRouter(c fiber.Router) {
-	userRepo := repository.NewUserRepository(database.Db)
-	userService := service.NewUserService(userRepo)
+	db := database.Db
+	userRepo := repository.NewUserRepository(db)
+	ticketRepository := repository.NewTicketRepository(db)
+
+	userService := service.NewUserService(userRepo, ticketRepository)
 	userController := controller.NewUserController(userService)
 
 	userRouter := c.Group("/users")
@@ -20,4 +23,6 @@ func SetupUserRouter(c fiber.Router) {
 	userRouter.Post("", middleware.ProtectRouteByRole("ADMIN"), userController.CreateUser)
 	userRouter.Put("/:id", middleware.ProtectRouteByRole("ADMIN"), userController.UpdateUser)
 	userRouter.Delete("/:id", middleware.ProtectRouteByRole("ADMIN"), userController.DeleteUserById)
+
+	userRouter.Get("/:id/tickets", userController.GetTicketByUserId)
 }
