@@ -24,7 +24,7 @@ func SetupTicketRouter(r fiber.Router) {
 	ticketRouter.Post("", middleware.ProtectRouteByRole("ADMIN"), ticketController.CreateTicket)
 	ticketRouter.Put("/:id", middleware.ProtectRouteByRole("ADMIN"), ticketController.UpdateTicketById)
 
-	ticketRouter.Put("/:id/cancel", ticketController.UpdateTicketToCanceled)
+	ticketRouter.Put("/:id/status", ticketController.UpdateTicketStatus)
 
 	//ticketRouter.Delete("/:id", middleware.ProtectRouteByRole("ADMIN"), ticketController.DeleteTicket)
 

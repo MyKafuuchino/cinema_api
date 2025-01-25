@@ -15,4 +15,5 @@ func SetupAuthRoute(ctx fiber.Router) {
 
 	authRouter := ctx.Group("/auth")
 	authRouter.Post("/login", authController.Login)
+	authRouter.Post("/register", authController.Register)
 }

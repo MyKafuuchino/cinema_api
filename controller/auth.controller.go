@@ -34,3 +34,21 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(types.NewResponseSuccess("User login successfully", loginResponse))
 }
+
+func (c *AuthController) Register(ctx *fiber.Ctx) error {
+	var req dto.CreateUserRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Error parsing body: "+err.Error())
+	}
+
+	if err := helper.ValidateStruct(&req); err != nil {
+		return err
+	}
+
+	createUserResponse, err := c.authService.Register(&req)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(types.NewResponseSuccess("User register successfully", createUserResponse))
+}

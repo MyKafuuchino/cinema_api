@@ -2,7 +2,6 @@ package service
 
 import (
 	"cinema_api/dto"
-	"cinema_api/helper"
 	"cinema_api/model"
 	"cinema_api/repository"
 	"cinema_api/types"
@@ -18,7 +17,7 @@ type TicketService interface {
 	UpdateTicketById(id uint, ticketReq *dto.UpdateTicketRequest) (*types.TicketResponse, error)
 	DeleteTicketById(id uint) (*types.TicketResponse, error)
 
-	UpdateTicketToCanceled(id uint) (*types.TicketResponse, error)
+	UpdateTicketStatus(id uint, status string) (*types.TicketResponse, error)
 }
 
 type ticketService struct {
@@ -27,7 +26,7 @@ type ticketService struct {
 	screeningRepo repository.ScreeningRepository
 }
 
-func (s *ticketService) UpdateTicketToCanceled(id uint) (*types.TicketResponse, error) {
+func (s *ticketService) UpdateTicketStatus(id uint, status string) (*types.TicketResponse, error) {
 	isTicket, err := s.ticketRepo.FindById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -36,7 +35,16 @@ func (s *ticketService) UpdateTicketToCanceled(id uint) (*types.TicketResponse, 
 		return nil, err
 	}
 
-	isTicket.Status = "canceled"
+	switch status {
+	case "paid":
+		isTicket.Status = status
+	case "booked":
+		isTicket.Status = status
+	case "canceled":
+		isTicket.Status = status
+	default:
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Error updating ticket status :"+status)
+	}
 
 	if err := s.ticketRepo.Update(isTicket); err != nil {
 		return nil, err
@@ -148,22 +156,8 @@ func (s *ticketService) UpdateTicketById(id uint, ticketReq *dto.UpdateTicketReq
 		return nil, err
 	}
 
-	helper.UpdateFields(ticket, ticketReq)
-
-	_, err = s.userRepo.FindById(id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fiber.NewError(fiber.StatusNotFound, "User not found")
-		}
-		return nil, err
-	}
-
-	_, err = s.screeningRepo.FindById(id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fiber.NewError(fiber.StatusNotFound, "Screening not found")
-		}
-		return nil, err
+	if ticketReq != nil {
+		ticket.SeatNumber = *ticketReq.SeatNumber
 	}
 
 	if err := s.ticketRepo.Update(ticket); err != nil {

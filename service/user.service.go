@@ -108,7 +108,17 @@ func (s *userService) UpdateUserById(id uint, updateRequest *dto.UpdateUserReque
 		return nil, err
 	}
 
-	helper.UpdateFields(user, updateRequest)
+	if updateRequest.FullName != nil {
+		user.FullName = *updateRequest.FullName
+	}
+
+	if updateRequest.Password != nil {
+		user.Password = *updateRequest.Password
+	}
+
+	if updateRequest.Role != nil {
+		user.Role = *updateRequest.Role
+	}
 
 	if updateRequest.Password != nil {
 		hashedPassword, err := helper.HashPassword(*updateRequest.Password)

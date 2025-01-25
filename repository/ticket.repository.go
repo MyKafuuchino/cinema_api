@@ -3,7 +3,6 @@ package repository
 import (
 	"cinema_api/model"
 	"cinema_api/types"
-	"github.com/gofiber/fiber/v2/log"
 	"gorm.io/gorm"
 )
 
@@ -69,7 +68,6 @@ func (r ticketRepository) FindByScreeningId(id uint) ([]model.Ticket, error) {
 }
 
 func (r ticketRepository) Update(ticket *model.Ticket) error {
-	log.Info(ticket)
 	return r.db.Save(ticket).Error
 }
 

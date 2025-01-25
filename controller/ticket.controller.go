@@ -113,14 +113,16 @@ func (c *TicketController) DeleteTicket(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(types.NewResponseSuccess("Ticket Delete Successfully", deleteResponse))
 }
 
-func (c *TicketController) UpdateTicketToCanceled(ctx *fiber.Ctx) error {
+func (c *TicketController) UpdateTicketStatus(ctx *fiber.Ctx) error {
 	id := ctx.Params("id")
 	uId, err := helper.StringToUint(id)
 	if err != nil {
 		return err
 	}
 
-	updateResponse, err := c.ticketService.UpdateTicketToCanceled(uId)
+	status := ctx.Query("status")
+
+	updateResponse, err := c.ticketService.UpdateTicketStatus(uId, status)
 	if err != nil {
 		return err
 	}

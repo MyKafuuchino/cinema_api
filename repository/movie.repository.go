@@ -2,6 +2,9 @@ package repository
 
 import (
 	"cinema_api/model"
+	"errors"
+	"fmt"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +21,16 @@ type movieRepository struct {
 }
 
 func (r *movieRepository) Create(movie *model.Movie) error {
-	return r.db.Create(movie).Error
+	slugResult := slug.Make(movie.Title)
+	movie.Slug = slugResult
+
+	if err := r.db.Create(movie).Error; err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return fmt.Errorf("movie:%s already exists", movie.Title)
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *movieRepository) FindById(id uint) (*model.Movie, error) {
@@ -38,7 +50,15 @@ func (r *movieRepository) FindAll() ([]model.Movie, error) {
 }
 
 func (r *movieRepository) Update(movie *model.Movie) error {
-	return r.db.Save(movie).Error
+	slugResult := slug.Make(movie.Title)
+	movie.Slug = slugResult
+	if err := r.db.Save(movie).Error; err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return fmt.Errorf("movie:%s already exists", movie.Title)
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *movieRepository) Delete(id uint) error {

@@ -19,7 +19,7 @@ func UserSeed() {
 		Email:    "admin@example.com",
 		FullName: "Administrator",
 		Password: "admin",
-		Role:     "admin",
+		Role:     "ADMIN",
 	}
 
 	hashedPassword, err := helper.HashPassword(admin.Password)

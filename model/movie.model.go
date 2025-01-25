@@ -5,6 +5,7 @@ import "time"
 type Movie struct {
 	ID          uint      `gorm:"primaryKey"`
 	Title       string    `gorm:"size:100"`
+	Slug        string    `gorm:"size:100"`
 	Description string    `gorm:"type:text"`
 	Genre       string    `gorm:"size:50"`
 	Duration    int       `gorm:"type:int"`

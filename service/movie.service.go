@@ -2,7 +2,6 @@ package service
 
 import (
 	"cinema_api/dto"
-	"cinema_api/helper"
 	"cinema_api/model"
 	"cinema_api/repository"
 	"cinema_api/types"
@@ -101,7 +100,6 @@ func (s movieService) CreateMovie(createRequest *dto.CreateMovieRequest) (*types
 
 func (s movieService) UpdateMovieById(id uint, updateRequest *dto.UpdateMovieRequest) (*types.MovieResponse, error) {
 	movie, err := s.movieRepo.FindById(id)
-
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fiber.NewError(fiber.StatusNotFound, "Movie not found")
@@ -109,7 +107,21 @@ func (s movieService) UpdateMovieById(id uint, updateRequest *dto.UpdateMovieReq
 		return nil, err
 	}
 
-	helper.UpdateFields(movie, updateRequest)
+	if updateRequest.Title != nil {
+		movie.Title = *updateRequest.Title
+	}
+	if updateRequest.Description != nil {
+		movie.Description = *updateRequest.Description
+	}
+	if updateRequest.Genre != nil {
+		movie.Genre = *updateRequest.Genre
+	}
+	if updateRequest.Duration != nil {
+		movie.Duration = *updateRequest.Duration
+	}
+	if updateRequest.ReleaseDate != nil {
+		movie.ReleaseDate = *updateRequest.ReleaseDate
+	}
 
 	if err := s.movieRepo.Update(movie); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to update movie : "+err.Error())

@@ -2,7 +2,6 @@ package service
 
 import (
 	"cinema_api/dto"
-	"cinema_api/helper"
 	"cinema_api/model"
 	"cinema_api/repository"
 	"cinema_api/types"
@@ -119,7 +118,21 @@ func (s *screeningService) UpdateScreeningById(id uint, screeningReq *dto.Update
 		return nil, err
 	}
 
-	helper.UpdateFields(screening, screeningReq)
+	if screeningReq.MovieID != nil {
+		screening.MovieID = *screeningReq.MovieID
+	}
+
+	if screeningReq.CinemaID != nil {
+		screening.CinemaID = *screeningReq.CinemaID
+	}
+
+	if screeningReq.ScreeningTime != nil {
+		screening.ScreeningTime = *screeningReq.ScreeningTime
+	}
+
+	if screeningReq.Price != nil {
+		screening.Price = *screeningReq.Price
+	}
 
 	_, err = s.movieRepo.FindById(screening.MovieID)
 	if err != nil {

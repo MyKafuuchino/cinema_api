@@ -20,7 +20,7 @@ func SetupUserRouter(c fiber.Router) {
 	userRouter := c.Group("/users")
 	userRouter.Get("", middleware.ProtectRouteByRole("ADMIN"), userController.GetAllUsers)
 	userRouter.Get("/:id", userController.GetUserById)
-	userRouter.Post("", middleware.ProtectRouteByRole("ADMIN"), userController.CreateUser)
+	//userRouter.Post("", middleware.ProtectRouteByRole("ADMIN"), userController.CreateUser)
 	userRouter.Put("/:id", middleware.ProtectRouteByRole("ADMIN"), userController.UpdateUser)
 	userRouter.Delete("/:id", middleware.ProtectRouteByRole("ADMIN"), userController.DeleteUserById)
 

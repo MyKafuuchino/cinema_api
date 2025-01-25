@@ -2,7 +2,6 @@ package service
 
 import (
 	"cinema_api/dto"
-	"cinema_api/helper"
 	"cinema_api/model"
 	"cinema_api/repository"
 	"cinema_api/types"
@@ -97,7 +96,13 @@ func (s *cinemaService) UpdateCinemaById(id uint, updateRequest *dto.UpdateCinem
 		return nil, err
 	}
 
-	helper.UpdateFields(cinema, updateRequest)
+	if updateRequest.Name != nil {
+		cinema.Name = *updateRequest.Name
+	}
+
+	if updateRequest.Location != nil {
+		cinema.Location = *updateRequest.Location
+	}
 
 	if err := s.cinemaRepo.Update(cinema); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to update cinema: "+err.Error())

@@ -3,32 +3,35 @@ package service
 import (
 	"cinema_api/dto"
 	"cinema_api/helper"
+	"cinema_api/model"
 	"cinema_api/repository"
 	"cinema_api/types"
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"gorm.io/gorm"
 )
 
 type AuthService interface {
 	Login(loginReq *dto.LoginRequest) (*types.LoginResponse, error)
+	Register(reqUser *dto.CreateUserRequest) (*types.UserResponse, error)
 }
 
 type authService struct {
 	userRepo repository.UserRepository
 }
 
-func (s authService) Login(loginReq *dto.LoginRequest) (*types.LoginResponse, error) {
+func (s *authService) Login(loginReq *dto.LoginRequest) (*types.LoginResponse, error) {
 	user, err := s.userRepo.FindByEmail(loginReq.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fiber.NewError(fiber.StatusNotFound, "email or password is incorrect")
+			return nil, fiber.NewError(fiber.StatusUnauthorized, "email or password is incorrect")
 		}
 		return nil, err
 	}
 
-	if err := helper.VerifyPassword(user.Password, loginReq.Password); err {
-		return nil, fiber.NewError(fiber.StatusConflict, "email or password is incorrect")
+	if !helper.VerifyPassword(user.Password, loginReq.Password) {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "email or password is incorrect")
 	}
 
 	userPayload := types.UserPayload{
@@ -44,6 +47,42 @@ func (s authService) Login(loginReq *dto.LoginRequest) (*types.LoginResponse, er
 	}
 
 	return &authResponse, err
+}
+
+func (s *authService) Register(reqUser *dto.CreateUserRequest) (*types.UserResponse, error) {
+	hashedPassword, err := helper.HashPassword(reqUser.Password)
+	if err != nil {
+		log.Fatalf("Failed to hash password for user %s: %v", reqUser.Email, err)
+	}
+
+	reqUser.Password = hashedPassword
+
+	user := model.User{
+		FullName: reqUser.FullName,
+		Email:    reqUser.Email,
+		Password: reqUser.Password,
+		Role:     reqUser.Role,
+	}
+
+	log.Info(user)
+
+	if err := s.userRepo.Create(&user); err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, fiber.NewError(fiber.StatusConflict, "email has been used :"+err.Error())
+		}
+		return nil, err
+	}
+
+	createResponse := types.UserResponse{
+		ID:       user.ID,
+		FullName: user.FullName,
+		Email:    user.Email,
+		Role:     user.Role,
+		CreateAt: user.CreatedAt,
+		UpdateAt: user.UpdatedAt,
+	}
+
+	return &createResponse, nil
 }
 
 func NewAuthService(userRepo repository.UserRepository) AuthService {
