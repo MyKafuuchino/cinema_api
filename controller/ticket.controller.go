@@ -7,6 +7,7 @@ import (
 	"cinema_api/types"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
+	"strconv"
 )
 
 type TicketController struct {
@@ -36,7 +37,20 @@ func (c *TicketController) CreateTicket(ctx *fiber.Ctx) error {
 }
 
 func (c *TicketController) GetAllTickets(ctx *fiber.Ctx) error {
-	ticketsResponse, err := c.ticketService.GetAllTickets()
+	limit, err := strconv.Atoi(ctx.Query("limit"))
+	if err != nil {
+		return fiber.NewError(http.StatusUnprocessableEntity, "Limit parameter must be an integer")
+	}
+	offset, err := strconv.Atoi(ctx.Query("offset"))
+	if err != nil {
+		return fiber.NewError(http.StatusUnprocessableEntity, "Offset parameter must be an integer")
+	}
+	params := &types.QueryParamRequest{
+		Status: ctx.Query("status"),
+		Limit:  limit,
+		Offset: offset,
+	}
+	ticketsResponse, err := c.ticketService.GetAllTickets(params)
 	if err != nil {
 		return err
 	}
@@ -97,4 +111,19 @@ func (c *TicketController) DeleteTicket(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(types.NewResponseSuccess("Ticket Delete Successfully", deleteResponse))
+}
+
+func (c *TicketController) UpdateTicketToCanceled(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	uId, err := helper.StringToUint(id)
+	if err != nil {
+		return err
+	}
+
+	updateResponse, err := c.ticketService.UpdateTicketToCanceled(uId)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(types.NewResponseSuccess("Ticket Update Successfully", updateResponse))
 }

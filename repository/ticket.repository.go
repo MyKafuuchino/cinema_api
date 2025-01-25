@@ -2,12 +2,14 @@ package repository
 
 import (
 	"cinema_api/model"
+	"cinema_api/types"
+	"github.com/gofiber/fiber/v2/log"
 	"gorm.io/gorm"
 )
 
 type TicketRepository interface {
 	Create(ticket *model.Ticket) error
-	FindAll() ([]model.Ticket, error)
+	FindAll(params *types.QueryParamRequest) ([]model.Ticket, error)
 	FindById(id uint) (*model.Ticket, error)
 
 	FindByUserId(id uint) ([]model.Ticket, error)
@@ -24,11 +26,21 @@ func (r ticketRepository) Create(ticket *model.Ticket) error {
 	return r.db.Create(ticket).Error
 }
 
-func (r ticketRepository) FindAll() ([]model.Ticket, error) {
+func (r ticketRepository) FindAll(params *types.QueryParamRequest) ([]model.Ticket, error) {
 	var tickets []model.Ticket
-	if err := r.db.Find(&tickets).Error; err != nil {
+
+	query := r.db
+
+	if params.Status != "" {
+		query = query.Where("status = ?", params.Status)
+	}
+
+	query = query.Limit(params.Limit).Offset(params.Offset)
+
+	if err := query.Find(&tickets).Error; err != nil {
 		return nil, err
 	}
+
 	return tickets, nil
 }
 
@@ -57,6 +69,7 @@ func (r ticketRepository) FindByScreeningId(id uint) ([]model.Ticket, error) {
 }
 
 func (r ticketRepository) Update(ticket *model.Ticket) error {
+	log.Info(ticket)
 	return r.db.Save(ticket).Error
 }
 

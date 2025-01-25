@@ -7,7 +7,7 @@ type Ticket struct {
 	UserID      uint      `gorm:"index"`
 	ScreeningID uint      `gorm:"index"`
 	SeatNumber  string    `gorm:"size:10"`
-	Status      string    `gorm:"type:enum('booked','paid');default:'booked'"`
+	Status      string    `gorm:"type:enum('booked','paid', 'canceled');default:'booked'"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 }

@@ -4,7 +4,7 @@ CREATE TABLE `tickets`
     `user_id`      integer,
     `screening_id` integer,
     `seat_number`  integer UNIQUE,
-    `status`       enum ('booked','paid') DEFAULT 'booked',
+    `status`       enum ('booked','paid', 'canceled') DEFAULT 'booked',
     `created_at`   timestamp,
     `updated_at`   timestamp
 );

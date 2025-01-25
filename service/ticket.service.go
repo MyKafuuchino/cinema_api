@@ -13,16 +13,46 @@ import (
 
 type TicketService interface {
 	Create(ticketReq *dto.CreateTicketRequest) (*types.TicketResponse, error)
-	GetAllTickets() ([]types.TicketResponse, error)
+	GetAllTickets(params *types.QueryParamRequest) ([]types.TicketResponse, error)
 	GetTicketById(id uint) (*types.TicketResponse, error)
 	UpdateTicketById(id uint, ticketReq *dto.UpdateTicketRequest) (*types.TicketResponse, error)
 	DeleteTicketById(id uint) (*types.TicketResponse, error)
+
+	UpdateTicketToCanceled(id uint) (*types.TicketResponse, error)
 }
 
 type ticketService struct {
 	ticketRepo    repository.TicketRepository
 	userRepo      repository.UserRepository
 	screeningRepo repository.ScreeningRepository
+}
+
+func (s *ticketService) UpdateTicketToCanceled(id uint) (*types.TicketResponse, error) {
+	isTicket, err := s.ticketRepo.FindById(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Ticket not found :"+err.Error())
+		}
+		return nil, err
+	}
+
+	isTicket.Status = "canceled"
+
+	if err := s.ticketRepo.Update(isTicket); err != nil {
+		return nil, err
+	}
+
+	ticketResponse := &types.TicketResponse{
+		ID:          isTicket.ID,
+		UserID:      isTicket.UserID,
+		ScreeningID: isTicket.ScreeningID,
+		SeatNumber:  isTicket.SeatNumber,
+		Status:      isTicket.Status,
+		CreatedAt:   isTicket.CreatedAt,
+		UpdatedAt:   isTicket.UpdatedAt,
+	}
+
+	return ticketResponse, nil
 }
 
 func (s *ticketService) Create(ticketReq *dto.CreateTicketRequest) (*types.TicketResponse, error) {
@@ -69,8 +99,8 @@ func (s *ticketService) Create(ticketReq *dto.CreateTicketRequest) (*types.Ticke
 	return createResponse, nil
 }
 
-func (s *ticketService) GetAllTickets() ([]types.TicketResponse, error) {
-	ticket, err := s.ticketRepo.FindAll()
+func (s *ticketService) GetAllTickets(params *types.QueryParamRequest) ([]types.TicketResponse, error) {
+	ticket, err := s.ticketRepo.FindAll(params)
 	if err != nil {
 		return nil, err
 	}
