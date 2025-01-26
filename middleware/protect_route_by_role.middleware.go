@@ -32,6 +32,8 @@ func ProtectRouteByRole(roles ...string) fiber.Handler {
 			}
 		}
 
+		ctx.Locals("claim", claim)
+
 		return ctx.Next()
 	}
 }

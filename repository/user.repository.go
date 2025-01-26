@@ -2,6 +2,7 @@ package repository
 
 import (
 	"cinema_api/model"
+	"cinema_api/types"
 	"gorm.io/gorm"
 )
 
@@ -9,7 +10,7 @@ type UserRepository interface {
 	Create(user *model.User) error
 	FindById(id uint) (*model.User, error)
 	FindByEmail(email string) (*model.User, error)
-	FindAll() ([]model.User, error)
+	FindAll(paramsReq *types.QueryParamRequest) ([]model.User, error)
 	Update(user *model.User) error
 	Delete(id uint) error
 }
@@ -38,9 +39,9 @@ func (r userRepository) FindByEmail(email string) (*model.User, error) {
 	return user, nil
 }
 
-func (r userRepository) FindAll() ([]model.User, error) {
+func (r userRepository) FindAll(paramsReq *types.QueryParamRequest) ([]model.User, error) {
 	var users []model.User
-	if err := r.db.Find(&users).Error; err != nil {
+	if err := r.db.Limit(paramsReq.Limit).Offset(paramsReq.Offset).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

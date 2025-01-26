@@ -12,7 +12,7 @@ import (
 )
 
 type UserService interface {
-	GetAllUsers() ([]types.UserResponse, error)
+	GetAllUsers(paramsReq *types.QueryParamRequest) ([]types.UserResponse, error)
 	GetUserById(id uint) (*types.UserResponse, error)
 	CreateUser(createUserReq *dto.CreateUserRequest) (*types.UserResponse, error)
 	UpdateUserById(id uint, updateRequest *dto.UpdateUserRequest) (*types.UserResponse, error)
@@ -26,8 +26,8 @@ type userService struct {
 	ticketRepo repository.TicketRepository
 }
 
-func (s *userService) GetAllUsers() ([]types.UserResponse, error) {
-	users, err := s.userRepo.FindAll()
+func (s *userService) GetAllUsers(paramsReq *types.QueryParamRequest) ([]types.UserResponse, error) {
+	users, err := s.userRepo.FindAll(paramsReq)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}

@@ -19,9 +19,16 @@ func NewTicketController(ticketService service.TicketService) *TicketController 
 }
 
 func (c *TicketController) CreateTicket(ctx *fiber.Ctx) error {
+	claim := ctx.Locals("claim")
+	user := claim.(types.UserPayload)
+
 	var req *dto.CreateTicketRequest
 	if err := ctx.BodyParser(&req); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Failed to parse body: "+err.Error())
+	}
+
+	if user.Id != req.UserID {
+		return fiber.NewError(fiber.StatusUnauthorized, "Invalid user")
 	}
 
 	if err := helper.ValidateStruct(req); err != nil {

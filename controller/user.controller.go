@@ -6,6 +6,8 @@ import (
 	"cinema_api/service"
 	"cinema_api/types"
 	"github.com/gofiber/fiber/v2"
+	"net/http"
+	"strconv"
 )
 
 type UserController struct {
@@ -17,7 +19,18 @@ func NewUserController(userService service.UserService) *UserController {
 }
 
 func (c *UserController) GetAllUsers(ctx *fiber.Ctx) error {
-	allUserResponse, err := c.userService.GetAllUsers()
+	limit, err := strconv.Atoi(ctx.Query("limit"))
+	if err != nil {
+		return fiber.NewError(http.StatusUnprocessableEntity, "Limit parameter must be an integer")
+	}
+	offset, err := strconv.Atoi(ctx.Query("offset"))
+
+	params := types.QueryParamRequest{
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	allUserResponse, err := c.userService.GetAllUsers(&params)
 	if err != nil {
 		return err
 	}
